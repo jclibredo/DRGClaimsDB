@@ -1,0 +1,90 @@
+create or replace PACKAGE DRGPKGPROCEDURE IS
+--------------------------------------------------------------------------------------------
+PROCEDURE INSERT_GROUPER_AUDITRAIL(Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        udatein IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.DATEPROCESS%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.SERIES%TYPE,
+        uclaimnumber IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.CLAIMNUMBER%TYPE,
+        udesc IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.DETAILS%TYPE,
+        ustats IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.STATUS%TYPE);
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_AUDITRAIL (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        udatein IN DRG_SHADOWBILLING.DRG_AUDITRAIL.DATETIME%TYPE,
+        udesc IN DRG_SHADOWBILLING.DRG_AUDITRAIL.DETAILS%TYPE,
+        ustats IN DRG_SHADOWBILLING.DRG_AUDITRAIL.STATUS%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_AUDITRAIL.SERIES%TYPE,
+        uclaimnumber IN DRG_SHADOWBILLING.DRG_AUDITRAIL.CLAIMNUMBER%TYPE,
+        ufilecontent IN DRG_SHADOWBILLING.DRG_AUDITRAIL.FILECONTENT%TYPE);
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_DRG_RESULT (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        uclaimid IN DRG_SHADOWBILLING.DRG_RESULT.CLAIM_ID%TYPE,
+        uresultid IN DRG_SHADOWBILLING.DRG_RESULT.RESULT_ID%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_RESULT.CLAIMS_SERIES%TYPE,
+        utags IN DRG_SHADOWBILLING.DRG_RESULT.TAGS%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_RESULT.LHIO%TYPE,
+        updxcode IN DRG_SHADOWBILLING.DRG_RESULT.PDX%TYPE,
+        usdxcode IN DRG_SHADOWBILLING.DRG_RESULT.SDX%TYPE,
+        uproc IN DRG_SHADOWBILLING.DRG_RESULT.PROC%TYPE);
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_DRG_WARNING_ERROR (
+        Message OUT VARCHAR2,
+        Code OUT INT,
+        uclaimid IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.CLAIM_ID%TYPE,
+        uresultid IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.RESULT_ID%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.SERIES%TYPE,
+	    ucode IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.ERROR_CODE%TYPE,
+        udata IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.DATA%TYPE,
+        udesc IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.DESCRIPTION%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.LHIO%TYPE);
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_PATIENT_INFO (
+        Message OUT VARCHAR2,
+        Code OUT INT,
+        updxcode IN DRG_SHADOWBILLING.DRG_INFO.PDX_CODE%TYPE,
+        unbtob IN DRG_SHADOWBILLING.DRG_INFO.NB_TOB%TYPE,
+	    unadmweight IN DRG_SHADOWBILLING.DRG_INFO.NB_ADMWEIGHT%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_INFO.SERIES%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_INFO.LHIO%TYPE,
+        uaccreno IN DRG_SHADOWBILLING.DRG_INFO.ACCRENO%TYPE,
+        uclaimnumber IN DRG_SHADOWBILLING.DRG_INFO.CLAIMNUMBER%TYPE);
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_PROCEDURE (
+        Message OUT VARCHAR2,
+        Code OUT INT,
+        uclaimid IN DRG_SHADOWBILLING.DRG_PROCEDURE.CLAIM_ID%TYPE,
+	    urvs IN DRG_SHADOWBILLING.DRG_PROCEDURE.RVS%TYPE,
+        ulaterality IN DRG_SHADOWBILLING.DRG_PROCEDURE.LATERALITY%TYPE,
+        uext1code IN DRG_SHADOWBILLING.DRG_PROCEDURE.EXT1_CODE%TYPE,
+        uext2code IN DRG_SHADOWBILLING.DRG_PROCEDURE.EXT2_CODE%TYPE,
+        uicd9code IN DRG_SHADOWBILLING.DRG_PROCEDURE.ICD9_CODE%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_PROCEDURE.SERIES%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_PROCEDURE.LHIO%TYPE);
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_SECONDARY (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        uclaimid IN DRG_SHADOWBILLING.DRG_DIAGNOSIS.CLAIM_ID%TYPE,
+        usdxcode IN DRG_SHADOWBILLING.DRG_DIAGNOSIS.SDX_CODE%TYPE,
+	    useries IN DRG_SHADOWBILLING.DRG_DIAGNOSIS.SERIES%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_DIAGNOSIS.LHIO%TYPE);
+---------------------------------------------------------------------------------------------
+PROCEDURE UPDATE_DRG_RESULT (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        umdc IN DRG_SHADOWBILLING.DRG_RESULT.MDC%TYPE,
+        updc IN DRG_SHADOWBILLING.DRG_RESULT.PDC%TYPE,
+        udc IN DRG_SHADOWBILLING.DRG_RESULT.DC%TYPE,
+        uresultid IN DRG_SHADOWBILLING.DRG_RESULT.RESULT_ID%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_RESULT.CLAIMS_SERIES%TYPE,
+        utags IN DRG_SHADOWBILLING.DRG_RESULT.TAGS%TYPE,
+        udrg IN DRG_SHADOWBILLING.DRG_RESULT.DRG%TYPE,
+        drgdetails IN DRG_SHADOWBILLING.DRG_RESULT.DRG%TYPE);
+---------------------------------------------------------------------------------------------
+ PROCEDURE GET_PCCL(p_pccl OUT VARCHAR2,p_pdx IN VARCHAR2,p_sdx IN  VARCHAR2,p_dc IN VARCHAR2);
+
+
+END DRGPKGPROCEDURE;

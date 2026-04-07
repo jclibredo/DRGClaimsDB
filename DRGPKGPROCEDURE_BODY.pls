@@ -1,0 +1,350 @@
+create or replace PACKAGE BODY DRGPKGPROCEDURE AS
+
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_GROUPER_AUDITRAIL(
+        Message         OUT VARCHAR2,
+        Code            OUT NUMBER,
+        udatein         IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.DATEPROCESS%TYPE,
+        useries         IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.SERIES%TYPE,
+        uclaimnumber    IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.CLAIMNUMBER%TYPE,
+        udesc           IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.DETAILS%TYPE,
+        ustats          IN DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL.STATUS%TYPE)
+AS
+BEGIN
+    INSERT INTO DRG_SHADOWBILLING.DRG_GROUPER_AUDITRAIL(DATEPROCESS,SERIES,CLAIMNUMBER,DETAILS,STATUS) 
+    VALUES (udatein,useries,uclaimnumber,udesc,ustats);
+        Message:='SUCC';    
+        Code:=00;
+    EXCEPTION
+    WHEN OTHERS THEN
+        Message :='An error was encounter WHILE Inserting Grouper Auditrail'||sqlcode||'-error-'||sqlerrm;
+        Code :=01;
+END INSERT_GROUPER_AUDITRAIL;
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_AUDITRAIL (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        udatein IN DRG_SHADOWBILLING.DRG_AUDITRAIL.DATETIME%TYPE,
+        udesc IN DRG_SHADOWBILLING.DRG_AUDITRAIL.DETAILS%TYPE,
+        ustats IN DRG_SHADOWBILLING.DRG_AUDITRAIL.STATUS%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_AUDITRAIL.SERIES%TYPE,
+        uclaimnumber IN DRG_SHADOWBILLING.DRG_AUDITRAIL.CLAIMNUMBER%TYPE,
+        ufilecontent IN DRG_SHADOWBILLING.DRG_AUDITRAIL.FILECONTENT%TYPE)
+    AS
+    BEGIN
+    INSERT INTO DRG_SHADOWBILLING.DRG_AUDITRAIL(DATETIME,DETAILS,STATUS,SERIES,CLAIMNUMBER,FILECONTENT) 
+    VALUES (udatein,udesc,ustats,useries,uclaimnumber,ufilecontent);
+        Message:='SUCC';    
+        Code:=00;
+    EXCEPTION
+    WHEN OTHERS THEN
+        Message :='An error was encounter WHILE Inserting Submission of DRG Claims'||sqlcode||'-error-'||sqlerrm;
+        Code :=01;
+  --COMMIT; create EXCEPTION FOR out put message
+END INSERT_AUDITRAIL;
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_DRG_RESULT (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        uclaimid IN DRG_SHADOWBILLING.DRG_RESULT.CLAIM_ID%TYPE,
+        uresultid IN DRG_SHADOWBILLING.DRG_RESULT.RESULT_ID%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_RESULT.CLAIMS_SERIES%TYPE,
+        utags IN DRG_SHADOWBILLING.DRG_RESULT.TAGS%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_RESULT.LHIO%TYPE,
+        updxcode IN DRG_SHADOWBILLING.DRG_RESULT.PDX%TYPE,
+        usdxcode IN DRG_SHADOWBILLING.DRG_RESULT.SDX%TYPE,
+        uproc IN DRG_SHADOWBILLING.DRG_RESULT.PROC%TYPE)
+        AS
+        BEGIN
+        INSERT INTO DRG_SHADOWBILLING.DRG_RESULT(CLAIM_ID,RESULT_ID,CLAIMS_SERIES,TAGS,LHIO,PDX,SDX,PROC) 
+        VALUES (uclaimid,uresultid,useries,utags,ulhio,updxcode,usdxcode,uproc);
+            Message:='SUCC';
+            Code:=00;
+        EXCEPTION
+        WHEN OTHERS THEN
+            Message :='An error was encounter WHILE Inserting Claims'||sqlcode||'-error-'||sqlerrm;
+            Code :=01;
+          --COMMIT; create EXCEPTION FOR out put message
+END INSERT_DRG_RESULT;
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_DRG_WARNING_ERROR (
+        Message OUT VARCHAR2,
+        Code OUT INT,
+        uclaimid IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.CLAIM_ID%TYPE,
+        uresultid IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.RESULT_ID%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.SERIES%TYPE,
+	    ucode IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.ERROR_CODE%TYPE,
+        udata IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.DATA%TYPE,
+        udesc IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.DESCRIPTION%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.LHIO%TYPE)
+        AS
+        BEGIN
+        INSERT INTO DRG_SHADOWBILLING.DRG_WARNING_ERROR(CLAIM_ID,RESULT_ID,SERIES,ERROR_CODE,DATA,DESCRIPTION,LHIO) 
+        VALUES (uclaimid,uresultid,useries,ucode,udata,udesc,ulhio);
+            Message:='SUCC';
+            Code:=00;
+        EXCEPTION
+        WHEN OTHERS THEN
+            Message :='An error was encountered WHILE Inserting Claims'||sqlcode||'-error-'||sqlerrm;
+            Code :='01';
+  --COMMIT; create EXCEPTION FOR out put message
+  END INSERT_DRG_WARNING_ERROR;
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_PATIENT_INFO (
+        Message OUT VARCHAR2,
+        Code OUT INT,
+        updxcode IN DRG_SHADOWBILLING.DRG_INFO.PDX_CODE%TYPE,
+        unbtob IN DRG_SHADOWBILLING.DRG_INFO.NB_TOB%TYPE,
+	    unadmweight IN DRG_SHADOWBILLING.DRG_INFO.NB_ADMWEIGHT%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_INFO.SERIES%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_INFO.LHIO%TYPE,
+        uaccreno IN DRG_SHADOWBILLING.DRG_INFO.ACCRENO%TYPE,
+        uclaimnumber IN DRG_SHADOWBILLING.DRG_INFO.CLAIMNUMBER%TYPE)
+        AS
+        BEGIN
+        INSERT INTO DRG_SHADOWBILLING.DRG_INFO (PDX_CODE,NB_TOB,NB_ADMWEIGHT,SERIES,LHIO,ACCRENO,CLAIMNUMBER) 
+        VALUES (updxcode,unbtob,unadmweight,useries,ulhio,uaccreno,uclaimnumber);
+            Message:='SUCC';
+            Code:='00';
+        EXCEPTION
+        WHEN OTHERS THEN
+            Message :='An error was encounter WHILE Inserting Claims'||sqlcode||'-error-'||sqlerrm;
+            Code :='01';
+  --COMMIT; create EXCEPTION FOR out put message
+END INSERT_PATIENT_INFO;
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_PROCEDURE (
+        Message OUT VARCHAR2,
+        Code OUT INT,
+        uclaimid IN DRG_SHADOWBILLING.DRG_PROCEDURE.CLAIM_ID%TYPE,
+	    urvs IN DRG_SHADOWBILLING.DRG_PROCEDURE.RVS%TYPE,
+        ulaterality IN DRG_SHADOWBILLING.DRG_PROCEDURE.LATERALITY%TYPE,
+        uext1code IN DRG_SHADOWBILLING.DRG_PROCEDURE.EXT1_CODE%TYPE,
+        uext2code IN DRG_SHADOWBILLING.DRG_PROCEDURE.EXT2_CODE%TYPE,
+        uicd9code IN DRG_SHADOWBILLING.DRG_PROCEDURE.ICD9_CODE%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_PROCEDURE.SERIES%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_PROCEDURE.LHIO%TYPE)
+        AS
+        BEGIN
+        INSERT INTO DRG_SHADOWBILLING.DRG_PROCEDURE 
+        (CLAIM_ID,RVS,LATERALITY,EXT1_CODE,EXT2_CODE,ICD9_CODE,SERIES,LHIO) 
+        VALUES (uclaimid,urvs,ulaterality,uext1code,uext2code,uicd9code,useries,ulhio);
+            Message:='SUCC';
+            Code:='00';
+        EXCEPTION
+        WHEN OTHERS THEN
+            Message :='An error was encounter WHILE Inserting Claims'||sqlcode||'-error-'||sqlerrm;
+            Code :='01';
+  --COMMIT; create EXCEPTION FOR out put message
+END INSERT_PROCEDURE;
+---------------------------------------------------------------------------------------------
+PROCEDURE INSERT_SECONDARY (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        uclaimid IN DRG_SHADOWBILLING.DRG_DIAGNOSIS.CLAIM_ID%TYPE,
+        usdxcode IN DRG_SHADOWBILLING.DRG_DIAGNOSIS.SDX_CODE%TYPE,
+	    useries IN DRG_SHADOWBILLING.DRG_DIAGNOSIS.SERIES%TYPE,
+        ulhio IN DRG_SHADOWBILLING.DRG_DIAGNOSIS.LHIO%TYPE)
+        AS
+        BEGIN
+        INSERT INTO DRG_SHADOWBILLING.DRG_DIAGNOSIS(CLAIM_ID,SDX_CODE,SERIES,LHIO) 
+        VALUES (uclaimid,usdxcode,useries,ulhio);
+            Message:='SUCC';
+            Code:=00;
+        EXCEPTION
+        WHEN OTHERS THEN
+            Message :='An error was encounter WHILE Inserting Claims'||sqlcode||'-error-'||sqlerrm;
+            Code :=01;
+  --COMMIT; create EXCEPTION FOR out put message
+END INSERT_SECONDARY;
+---------------------------------------------------------------------------------------------
+PROCEDURE UPDATE_DRG_RESULT (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        umdc IN DRG_SHADOWBILLING.DRG_RESULT.MDC%TYPE,
+        updc IN DRG_SHADOWBILLING.DRG_RESULT.PDC%TYPE,
+        udc IN DRG_SHADOWBILLING.DRG_RESULT.DC%TYPE,
+        uresultid IN DRG_SHADOWBILLING.DRG_RESULT.RESULT_ID%TYPE,
+        useries IN DRG_SHADOWBILLING.DRG_RESULT.CLAIMS_SERIES%TYPE,
+        utags IN DRG_SHADOWBILLING.DRG_RESULT.TAGS%TYPE,
+        udrg IN DRG_SHADOWBILLING.DRG_RESULT.DRG%TYPE,
+        drgdetails IN DRG_SHADOWBILLING.DRG_RESULT.DRG%TYPE)
+        AS
+        BEGIN
+        UPDATE DRG_SHADOWBILLING.DRG_RESULT SET MDC=umdc, PDC=updc, DC=udc, DRG=udrg , TAGS=utags, DETAILS=drgdetails WHERE RESULT_ID=uresultid AND CLAIMS_SERIES=useries;
+            Message:='SUCC';
+            Code:=00;
+        EXCEPTION
+        WHEN OTHERS THEN
+            Message :='An error was encounter WHILE Inserting Claims'||sqlcode||'-error-'||sqlerrm;
+            Code :=01;
+END UPDATE_DRG_RESULT;
+---------------------------------------------------------------------------------------------
+PROCEDURE  GET_PCCL(p_pccl OUT VARCHAR2,p_pdx IN VARCHAR2,p_sdx IN  VARCHAR2,p_dc IN VARCHAR2)
+        AS TYPE my_cursor IS REF CURSOR;
+        c_sdx my_cursor;
+        v_sdx_count PLS_INTEGER;
+        TYPE TABLE_TYPE IS TABLE OF VARCHAR2(4000);
+        t_sdx_code TABLE_TYPE := TABLE_TYPE();
+        v_ccl VARCHAR2(1000);
+        v_ccl_values VARCHAR2(1000);
+        v_ccl_non_zero PLS_INTEGER;
+        TYPE t_sdx_list IS TABLE OF VARCHAR2(100) INDEX BY VARCHAR2(50);
+        v_sdx t_sdx_list;
+        v_idx VARCHAR2(100);
+        v_sorted sortable_table_t := sortable_table_t();
+        v_sdx_ex CLOB;
+        c_ccex SYS_REFCURSOR;
+        l_new_ccl_values VARCHAR2(30);
+        v_maincc VARCHAR2(10);
+BEGIN
+        --CHECK IF THERE'S SDX                
+        IF p_sdx IS NULL THEN
+        p_pccl := '0';
+        ELSE
+        v_sdx_count := regexp_count(p_sdx,'[^,]+');
+        --IF THERE'S SDX, GET CCL VALUES FROM FUNCTION GET_CCL PER SDX
+        FOR i in 1..v_sdx_count LOOP
+        t_sdx_code.EXTEND;
+        t_sdx_code(i) := regexp_substr(DRGPKGFUNCTION.clean_icd10code(p_sdx),'[^,]+',1,i);
+        dbms_output.put_line(t_sdx_code(i));
+            v_ccl := DRGPKGFUNCTION.get_ccl(p_pdx=>p_pdx,p_sdx=>t_sdx_code(i),p_dc=>p_dc); 
+            v_ccl_values := v_ccl||v_ccl_values;
+            v_sdx(t_sdx_code(i)) := v_ccl;
+        END LOOP;
+            --DISPLAY ALL CCL VALUES
+            dbms_output.put_line('CCL Values: ' ||v_ccl_values);
+            v_ccl_non_zero := LENGTH(v_ccl_values) - REGEXP_COUNT(v_ccl_values, '0');
+
+            --COUNT NUMBER OF SDX WITH NON-ZERO CCL
+            dbms_output.put_line('Count Non-Zero:' ||v_ccl_non_zero);
+
+            --IF ONLY 1 SDX HAS VALID CCL IT IS THE FINAL PCCL
+            IF LENGTH(v_ccl_values) = 1 THEN
+            p_pccl := v_ccl;
+            dbms_output.put_line('PCCL: ' ||p_pccl);
+
+            --IF NO SDX WITH VALID CCL
+            ELSIF v_ccl_non_zero = 0 THEN
+            p_pccl := '0';
+            dbms_output.put_line('PCCL: ' ||p_pccl);
+            --TEST 
+            ELSE
+                --DO THE RECURSIVE EXCLUSION FOR SDX WITH NON-ZERO CCL
+                IF v_ccl_non_zero > 1 THEN
+--                  ARRANGE CCL VALUES IN DESC ORDER AND SDx WITH SAME CCL IN REVERSE ALPHABETICAL
+                    v_idx := v_sdx.first;
+
+                    WHILE v_idx is not null LOOP
+                    v_sorted.extend(1);
+                    v_sorted(v_sorted.last) := new sortable_t(v_idx,v_sdx(v_idx));
+                    v_idx := v_sdx.next(v_idx);
+                    DBMS_OUTPUT.PUT_LINE('V_IDX'||v_idx);
+                    END LOOP;
+                    SELECT cast(multiset(SELECT *
+                    FROM table(v_sorted)
+                    ORDER BY 2 desc, 1 desc)
+                    as sortable_table_t)
+                    into v_sorted
+                    FROM dual;
+                    dbms_output.put_line('Sorted SDx: ');
+                    DECLARE
+                    l_new_pdx VARCHAR2(10) := v_sorted(1).sdx;
+                    l_new_sdx VARCHAR2(1000);
+                    l_pdx_index number := 1;
+                    l_sdx_index number := 2;
+                    BEGIN
+                    FOR j in v_sorted.first .. v_sorted.last LOOP                        
+                        dbms_output.put_line(v_sorted(j).sdx || ' = ' || v_sorted(j).ccl);
+                        DBMS_OUTPUT.PUT_LINE('Round' || l_pdx_index);                        
+
+                        l_new_pdx := v_sorted(j).sdx; 
+                        l_new_ccl_values := v_sorted(j).ccl || l_new_ccl_values;
+
+                        FOR e IN l_sdx_index..v_sorted.COUNT LOOP  
+                        EXIT WHEN l_sdx_index > v_sorted.LAST;
+                        l_new_sdx := v_sorted(e).sdx;
+                        DBMS_OUTPUT.PUT_LINE('New PDX: '||l_new_pdx);
+                        DBMS_OUTPUT.PUT_LINE('New SDX: '||l_new_sdx);
+                        OPEN c_sdx FOR SELECT maincc
+                            FROM DRG_SHADOWBILLING.icd10_premdc
+                            WHERE code = l_new_sdx;
+                        LOOP
+                            FETCH c_sdx INTO v_maincc;
+                        EXIT WHEN c_sdx%notfound;
+                        END LOOP;
+                       -- SELECT maincc into v_maincc FROM icd10_premdc where code = l_new_sdx;
+                        c_ccex := DRGPKGFUNCTION.get_ccex(v_maincc);
+                        LOOP
+                        FETCH c_ccex INTO v_sdx_ex;
+                        IF v_sdx_ex = l_new_pdx THEN
+                        v_sorted(e).ccl := 0;
+                        ELSIF v_sdx_ex IS NULL THEN
+                        v_sorted(e).ccl := v_sorted(e).ccl;
+                        ELSE
+                        v_sorted(e).ccl := v_sorted(e).ccl;
+                        END IF;
+                        EXIT WHEN c_ccex%notfound;
+                        END LOOP;
+                        CLOSE c_ccex;                        
+
+                        DBMS_OUTPUT.PUT_LINE('New CCL: '||v_sorted(e).ccl);
+                        END LOOP;
+                    l_pdx_index := j+1;
+                    l_sdx_index := l_sdx_index+1;
+
+                    DBMS_OUTPUT.PUT_LINE('New CCL Values: '||DRGPKGFUNCTION.sort_chars(l_new_ccl_values));
+
+                    EXIT WHEN l_pdx_index > v_sorted.LAST;                    
+                    END LOOP; 
+                    l_sdx_index := l_sdx_index+1;
+
+                    END;
+                v_ccl_values := DRGPKGFUNCTION.sort_chars(l_new_ccl_values);
+--                    dbms_output.put_line(v_ccl_values);
+                GOTO get_pccl;
+
+--                ELSIF v_ccl_non_zero = 0 THEN
+--                p_pccl := '0';
+
+                ELSE
+                v_ccl_values := DRGPKGFUNCTION.sort_chars(v_ccl_values);
+                goto get_pccl;        
+                dbms_output.put_line('PCCL: ' ||p_pccl);
+                END IF;
+
+            <<get_pccl>>
+            p_pccl := case
+            WHEN v_ccl_values LIKE '44%' THEN '4'
+            WHEN v_ccl_values LIKE '43%' THEN '4'
+            WHEN v_ccl_values LIKE '42%' THEN '4'
+            WHEN v_ccl_values LIKE '411%' THEN '4'
+            WHEN v_ccl_values LIKE '41%' THEN '3'
+            WHEN v_ccl_values LIKE '4%' THEN '3'
+            WHEN v_ccl_values LIKE '33%' THEN '4'
+            WHEN v_ccl_values LIKE '322%' THEN '4'
+            WHEN v_ccl_values LIKE '3211%' THEN '4'
+            WHEN v_ccl_values LIKE '321%' THEN '3'
+            WHEN v_ccl_values LIKE '32%' THEN '3'
+            WHEN v_ccl_values LIKE '311111%' THEN '3'
+            WHEN v_ccl_values LIKE '3%' THEN '3'
+            WHEN v_ccl_values LIKE '2222%' THEN '4'
+            WHEN v_ccl_values LIKE '222%' THEN '3'
+            WHEN v_ccl_values LIKE '222111%' THEN '4'
+            WHEN v_ccl_values LIKE '22211%' THEN '3'
+            WHEN v_ccl_values LIKE '22%' THEN '3'
+            WHEN v_ccl_values LIKE '21%' THEN '3'
+            WHEN v_ccl_values LIKE '2%' THEN '2'
+            WHEN v_ccl_values LIKE '11111%' THEN '3'
+            WHEN v_ccl_values LIKE '1111%' THEN '2'
+            WHEN v_ccl_values LIKE '11%' THEN '2'
+            WHEN v_ccl_values LIKE '1%' THEN '1'
+            WHEN v_ccl_values LIKE '0%' THEN '0'
+            END;
+            dbms_output.put_line('PCCL: ' ||p_pccl);
+            END IF;  
+        END IF;
+END GET_PCCL;
+--------------------------------------------------------------------------------  
+
+END DRGPKGPROCEDURE;
