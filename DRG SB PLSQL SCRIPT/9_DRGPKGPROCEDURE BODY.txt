@@ -267,7 +267,7 @@ BEGIN
                         DBMS_OUTPUT.PUT_LINE('New PDX: '||l_new_pdx);
                         DBMS_OUTPUT.PUT_LINE('New SDX: '||l_new_sdx);
                         OPEN c_sdx FOR SELECT maincc
-                            FROM DRG_SHADOWBILLING.i10_v2
+                            FROM DRG_SHADOWBILLING.i10
                             WHERE code = l_new_sdx;
                         LOOP
                             FETCH c_sdx INTO v_maincc;
