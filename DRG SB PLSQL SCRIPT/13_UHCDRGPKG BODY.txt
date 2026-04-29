@@ -1,0 +1,33 @@
+create or replace PACKAGE BODY    UHCDRGPKG AS
+FUNCTION  GET_NCLAIMS(seriesnum IN varchar2) RETURN SYS_REFCURSOR
+IS
+ nclaims SYS_REFCURSOR;
+BEGIN
+  --RETURN UCPS.DRG_SELECT.GET_CLAIM_DATA(seriesnum);
+ OPEN nclaims FOR 
+          SELECT DATEOFBIRTH FROM DRG_SHADOWBILLING.ACR_PATIENT_DATA WHERE SERIES=seriesnum;
+    RETURN nclaims;
+END GET_NCLAIMS;
+ -----------------------------------------------------------------------------------------
+  FUNCTION GETPATIENTDATA(seriesnums IN DRG_SHADOWBILLING.ACR_PATIENT_DATA.SERIES%type,
+  			     claimid IN DRG_SHADOWBILLING.ACR_PATIENT_DATA.CLAIMNUMBER%type) RETURN SYS_REFCURSOR IS
+   v_result SYS_REFCURSOR;
+  BEGIN
+    -- TODO: Implementation required for FUNCTION UHCDRGPKG.GETACRPATIENTDATE
+     OPEN v_result FOR 
+          SELECT   SERIES,EXPIREDDATE,EXPIREDTIME,TIMEADMISSION,TIMEDISCHARGE,ADMISSIONDATE,DISCHARGEDATE,GENDER,DISCHARGETYPE,CLAIMNUMBER
+          FROM DRG_SHADOWBILLING.ACR_PATIENT_DATA WHERE SERIES=seriesnums AND CLAIMNUMBER=claimid;
+    RETURN v_result;
+  END GETPATIENTDATA;
+-----------------------------------------------------------------------------------------
+  FUNCTION GETPRIVATEFACILITY(upmcc IN DRG_SHADOWBILLING.ACR_HCF_SECTOR.PMCC_NO%type) RETURN SYS_REFCURSOR AS
+  v_result SYS_REFCURSOR;
+  BEGIN
+    -- TODO: Implementation required for FUNCTION UHCDRGPKG.GETPRIVATEFACILITY
+    OPEN v_result FOR 
+          SELECT   PMCC_NO,SOC_SECTOR
+          FROM DRG_SHADOWBILLING.ACR_HCF_SECTOR WHERE PMCC_NO=upmcc AND SOC_SECTOR IS NOT NULL;
+    RETURN v_result;
+  END GETPRIVATEFACILITY;
+-----------------------------------------------------------------------------------------
+END;

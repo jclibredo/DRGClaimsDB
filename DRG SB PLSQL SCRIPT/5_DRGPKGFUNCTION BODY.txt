@@ -1,0 +1,739 @@
+create or replace PACKAGE BODY                               "DRGPKGFUNCTION" AS
+
+---------------------------------------------------------------------------------------
+  FUNCTION    GET_ACCPDX_VALUE(p_pdx_code IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE) RETURN SYS_REFCURSOR 
+AS
+accpdxs SYS_REFCURSOR;
+BEGIN
+    OPEN accpdxs FOR  
+    SELECT
+        CODE,MDC,PDC,CC,MAINCC,CCROW,HIV_AX,TRAUMA,ACCPDX,SEX,AGEMIN,AGEDMIN,AGEMAX,AGEDUSE
+        FROM
+        DRG_SHADOWBILLING.I10_V2
+    WHERE
+        CODE = p_pdx_code AND ACCPDX='Y';
+  RETURN accpdxs;
+END GET_ACCPDX_VALUE;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_ALL_ICD10 RETURN SYS_REFCURSOR
+IS
+ a_result SYS_REFCURSOR;
+BEGIN
+  OPEN a_result FOR
+  SELECT validcode,description,code FROM DRG_SHADOWBILLING.I10VX_V2;
+  RETURN a_result;
+END GET_ALL_ICD10;
+---------------------------------------------------------------------------------------
+FUNCTION GET_AX  RETURN SYS_REFCURSOR
+IS
+validate_ax SYS_REFCURSOR;
+BEGIN
+    OPEN validate_ax FOR  
+    SELECT *
+        FROM
+        DRG_SHADOWBILLING.AX_V2;
+  RETURN validate_ax;
+end GET_AX;
+---------------------------------------------------------------------------------------
+FUNCTION   GET_AX_PARAM(p_ax in DRG_SHADOWBILLING.AX_V2.AX%TYPE,p_code in DRG_SHADOWBILLING.AX_V2.CODES%TYPE)  RETURN SYS_REFCURSOR
+IS
+get_ax SYS_REFCURSOR;
+BEGIN
+    OPEN get_ax FOR  
+    SELECT *
+        FROM
+        DRG_SHADOWBILLING.AX_V2
+        WHERE AX=p_ax AND CODES=p_code;
+  RETURN get_ax;
+end GET_AX_PARAM;
+---------------------------------------------------------------------------------------
+FUNCTION    GET_BMDC_VALIDATION_PREMDC(
+                        p_pdx_code IN DRG_SHADOWBILLING.BMDC.ICD10%TYPE) RETURN SYS_REFCURSOR 
+AS
+bmdc_validation SYS_REFCURSOR;
+BEGIN
+    OPEN bmdc_validation FOR  
+    SELECT ICD10,MDC_F,PDC_F,MDC_M,PDC_M FROM DRG_SHADOWBILLING.BMDC WHERE ICD10 = p_pdx_code;
+  RETURN bmdc_validation;
+END GET_BMDC_VALIDATION_PREMDC;
+---------------------------------------------------------------------------------------
+FUNCTION GET_CCEX(p_maincc IN VARCHAR2)RETURN SYS_REFCURSOR AS c_cursor SYS_REFCURSOR;
+BEGIN
+    OPEN c_cursor FOR 
+        SELECT PDX FROM CCEX_V1 WHERE SDX = p_maincc;
+    RETURN c_cursor;
+END GET_CCEX;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_CHECK_DUPLICATE(claimnum IN DRG_SHADOWBILLING.DRG_INFO.CLAIMNUMBER%TYPE,accre IN DRG_SHADOWBILLING.DRG_INFO.ACCRENO%TYPE) RETURN SYS_REFCURSOR
+IS
+ dupnclaims SYS_REFCURSOR;
+BEGIN
+  OPEN dupnclaims FOR 
+  SELECT  PDX_CODE,NB_TOB,NB_ADMWEIGHT,SERIES,LHIO,ACCRENO,CLAIMNUMBER FROM DRG_SHADOWBILLING.DRG_INFO WHERE ACCRENO=accre AND CLAIMNUMBER=claimnum;
+  RETURN dupnclaims;
+END GET_CHECK_DUPLICATE;
+---------------------------------------------------------------------------------------
+FUNCTION   GET_CONVERTER(rvs_code IN DRG_SHADOWBILLING.RVS_TO_ICD9CM.RVSCODE%TYPE) RETURN SYS_REFCURSOR
+IS
+converter SYS_REFCURSOR;
+BEGIN
+    OPEN converter FOR  
+    SELECT ID,RVSCODE,ICD9CODE,CATEGORY FROM DRG_SHADOWBILLING.RVS_TO_ICD9CM WHERE RVSCODE = rvs_code AND RVSCODE IS NOT NULL; 
+  RETURN converter;
+END GET_CONVERTER;
+---------------------------------------------------------------------------------------
+FUNCTION get_da (daggers IN DRG_SHADOWBILLING.DA.DAGGER%TYPE,ASterisks IN DRG_SHADOWBILLING.DA.ASTERISK%TYPE) RETURN SYS_REFCURSOR
+IS
+DaggerAS SYS_REFCURSOR;
+BEGIN
+    OPEN DaggerAS FOR  
+    SELECT DAGGER,ASTERISK,PDX,SDX FROM DRG_SHADOWBILLING.DA WHERE DAGGER=daggers AND ASTERISK=ASterisks;
+  RETURN DaggerAS;
+END get_da;
+---------------------------------------------------------------------------------------
+FUNCTION GET_DC(dcs IN DRG_SHADOWBILLING.DC.DC%TYPE)RETURN SYS_REFCURSOR
+IS
+dcs_output SYS_REFCURSOR;
+BEGIN
+    OPEN dcs_output FOR  
+    SELECT DCCOL,DRGX,CNAME,DC,MDC FROM DRG_SHADOWBILLING.DC WHERE DC=dcs;
+  RETURN dcs_output;
+END GET_DC;
+---------------------------------------------------------------------------------------
+FUNCTION GET_DRG(dcs IN DRG_SHADOWBILLING.DRG.DC%TYPE,drgs IN DRG_SHADOWBILLING.DRG.DRG%TYPE)RETURN SYS_REFCURSOR
+IS
+drg_output SYS_REFCURSOR;
+BEGIN
+    OPEN drg_output FOR  
+    SELECT RW,WTLOS,OT,MDF,DRGNAME,DRG,MDC,DC
+        FROM
+        DRG_SHADOWBILLING.DRG WHERE DC=dcs AND DRG=drgs;
+  RETURN drg_output;
+END GET_DRG;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_DRG_INFO(seriesnums IN DRG_SHADOWBILLING.DRG_INFO.SERIES%TYPE) RETURN SYS_REFCURSOR
+IS
+getdrginfo SYS_REFCURSOR;
+BEGIN
+    OPEN getdrginfo FOR  
+    SELECT NB_TOB,NB_ADMWEIGHT FROM DRG_SHADOWBILLING.DRG_INFO WHERE SERIES=seriesnums;
+  RETURN getdrginfo;
+END GET_DRG_INFO;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_DRG_RESULT(tagss IN DRG_SHADOWBILLING.DRG_RESULT.TAGS%TYPE) RETURN SYS_REFCURSOR 
+AS
+drgresult SYS_REFCURSOR;
+BEGIN
+    OPEN drgresult FOR  
+    SELECT
+        CLAIMS_SERIES, TAGS, PDX, PROC, SDX , LHIO ,RESULT_ID,CLAIM_ID
+        FROM
+        DRG_SHADOWBILLING.DRG_RESULT
+    WHERE
+        TAGS = tagss AND DRG IS NULL;
+  RETURN drgresult;	
+END GET_DRG_RESULT;
+---------------------------------------------------------------------------------------
+FUNCTION GET_ICD10_PREMDC(
+    p_pdx_code    IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE,
+    age_day       IN DRG_SHADOWBILLING.I10_V2.AGEDMIN%TYPE,
+    age_min_year  IN DRG_SHADOWBILLING.I10_V2.AGEMIN%TYPE,
+    p_patient_sex IN DRG_SHADOWBILLING.I10_V2.SEX%TYPE
+) RETURN SYS_REFCURSOR
+AS
+    pdx_validation SYS_REFCURSOR;
+BEGIN
+    OPEN pdx_validation FOR  
+        SELECT CODE, MDC, PDC, CC, MAINCC, CCROW, HIV_AX, 
+               TRAUMA, ACCPDX, SEX, AGEMIN, AGEDMIN, AGEMAX, AGEDUSE 
+        FROM   DRG_SHADOWBILLING.I10_V2 
+        WHERE  CODE = p_pdx_code 
+          AND  AGEMIN <= age_min_year 
+          AND  AGEMAX >= age_min_year
+          -- Sex logic: Match patient sex OR 'B' for Both
+          AND (SEX = p_patient_sex OR SEX = 'B')
+          -- Age Use logic: If 'Y', validate age_day; otherwise ignore
+          AND (AGEDUSE <> 'Y' OR AGEDMIN <= age_day);
+
+    RETURN pdx_validation; 
+END GET_ICD10_PREMDC;
+---------------------------------------------------------------------------------------
+FUNCTION GET_ICD10PREMDC(p_pdx_code IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE) RETURN SYS_REFCURSOR 
+AS
+accpdxs SYS_REFCURSOR;
+BEGIN
+    OPEN accpdxs FOR  
+    SELECT CODE,MDC,PDC,CC,MAINCC,CCROW,HIV_AX,TRAUMA,ACCPDX,SEX,AGEMIN,AGEDMIN,AGEMAX,AGEDUSE FROM DRG_SHADOWBILLING.I10_V2 WHERE CODE = p_pdx_code;
+  RETURN accpdxs;
+END GET_ICD10PREMDC;
+---------------------------------------------------------------------------------------
+FUNCTION GET_ICD9_JOIN_TABLE(icd9code IN DRG_SHADOWBILLING.ICD9_TO_MDC.CODE%TYPE, 
+                            mdcs IN DRG_SHADOWBILLING.ICD9_TO_MDC.MDC%TYPE)RETURN SYS_REFCURSOR
+IS
+join_icd9_output SYS_REFCURSOR;
+BEGIN
+    OPEN join_icd9_output FOR  
+   SELECT a.CODE AS CODES ,a.MDC, a.PDC, b.CODE, b.ORP, b.SEX, b.ORPTYPE, b.PROCGR, b.PCPART, b.EXTLEV, b.DRGUSE, b.MAYUN,
+   b.PROC_SITE, b.DESCS 
+   FROM DRG_SHADOWBILLING.ICD9_TO_MDC a join DRG_SHADOWBILLING.ICD9CM  b
+  on a.CODE=b.CODE WHERE a.CODE=icd9code AND  b.CODE=icd9code AND a.MDC=mdcs;
+  RETURN join_icd9_output;
+END GET_ICD9_JOIN_TABLE;
+---------------------------------------------------------------------------------------
+FUNCTION GET_ICD9_MDC(icd9code in DRG_SHADOWBILLING.ICD9_TO_MDC.CODE%TYPE,
+                        p_pdc IN DRG_SHADOWBILLING.ICD9_TO_MDC.PDC%TYPE,
+                        p_mdc IN DRG_SHADOWBILLING.ICD9_TO_MDC.MDC%TYPE)  RETURN SYS_REFCURSOR
+IS
+get_icd9_cm SYS_REFCURSOR;
+BEGIN
+    OPEN get_icd9_cm FOR  
+    SELECT CODE,MDC,PDC FROM DRG_SHADOWBILLING.ICD9_TO_MDC WHERE CODE=icd9code AND MDC=p_mdc AND PDC = p_pdc;
+  RETURN get_icd9_cm;
+END GET_ICD9_MDC;
+---------------------------------------------------------------------------------------
+--FUNCTION   GET_ICD9CM_FINDDC(ICD9CODE in ICD9_TO_MDC.CODE%TYPE)  RETURN SYS_REFCURSOR
+--IS
+--get_icd9_DC SYS_REFCURSOR;
+--BEGIN
+--    OPEN get_icd9_DC FOR  
+--    SELECT CODE,MDC,PDC FROM DRG_SHADOWBILLING.ICD9_TO_MDC WHERE CODE=ICD9CODE AND MDC=MDC;
+--  RETURN get_icd9_DC;
+--END GET_ICD9CM_FINDDC;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_MAINCC_USED_ICD10(
+ccCode IN DRG_SHADOWBILLING.I10_V2.MAINCC%TYPE,
+mdc IN DRG_SHADOWBILLING.I10_V2.MDC%TYPE,
+pdcs IN DRG_SHADOWBILLING.I10_V2.PDC%TYPE) RETURN SYS_REFCURSOR 
+AS
+maincc SYS_REFCURSOR;
+BEGIN
+    OPEN maincc FOR  
+    SELECT
+        CODE,MDC,PDC,CC,MAINCC,CCROW,HIV_AX,TRAUMA,ACCPDX,SEX,AGEMIN,AGEDMIN,AGEMAX,AGEDUSE
+        FROM DRG_SHADOWBILLING.I10_V2 WHERE MAINCC =ccCode  AND MDC =mdc AND PDC=pdcs;
+  RETURN maincc;
+END GET_MAINCC_USED_ICD10;
+---------------------------------------------------------------------------------------
+FUNCTION GET_MAJOR_OR_PROC(icd9code IN VARCHAR2 , mdcs IN VARCHAR2 , pdcs IN VARCHAR2)RETURN SYS_REFCURSOR
+IS
+major_or_proc SYS_REFCURSOR;
+BEGIN
+    OPEN major_or_proc FOR  
+   SELECT a.CODE AS CODES ,a.MDC, a.PDC, b.CODE, b.ORP, b.SEX, b.ORPTYPE, b.PROCGR, b.PCPART, b.EXTLEV, b.DRGUSE, b.MAYUN,
+   b.DESCS FROM DRG_SHADOWBILLING.ICD9_TO_MDC a join DRG_SHADOWBILLING.ICD9CM  b
+on a.CODE =b.CODE WHERE a.CODE=icd9code AND  b.CODE=icd9code AND a.MDC=mdcs AND b.PROCGR!='0' AND a.PDC=pdcs;
+  RETURN major_or_proc;
+END GET_MAJOR_OR_PROC;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_MDC(mdcs in DRG_SHADOWBILLING.MDC.MDC%TYPE)RETURN SYS_REFCURSOR
+IS
+mdc_output SYS_REFCURSOR;
+BEGIN
+    OPEN mdc_output FOR  
+    SELECT MDC,DESCRIPTION,LABEL FROM DRG_SHADOWBILLING.MDC WHERE MDC=mdcs;
+  RETURN mdc_output;
+END GET_MDC;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_PCOM(
+codea IN DRG_SHADOWBILLING.PCOM.CODE1%TYPE, 
+codeb IN DRG_SHADOWBILLING.PCOM.CODE2%TYPE)RETURN SYS_REFCURSOR
+IS
+pcom SYS_REFCURSOR;
+BEGIN
+    OPEN pcom FOR  
+    SELECT CODE,DESCRIPTION,PDC,CODE1,DESC1,CODE2,DESC2
+        FROM
+        DRG_SHADOWBILLING.PCOM WHERE CODE1=codea AND CODE2=codeb OR(CODE1=codeb AND CODE2=codea);    
+  RETURN pcom;
+END GET_PCOM;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_PDC(pdcs in DRG_SHADOWBILLING.PDC.PDC%TYPE, 
+                  mdcs IN DRG_SHADOWBILLING.PDC.MDC%TYPE)RETURN SYS_REFCURSOR
+IS
+pdc_output SYS_REFCURSOR;
+BEGIN
+    OPEN pdc_output FOR  
+    SELECT PDC,CTYPE,HIERAR,CNAME,MDC FROM DRG_SHADOWBILLING.PDC WHERE PDC=pdcs AND MDC=mdcs;
+  RETURN pdc_output;
+END GET_PDC;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_PDC_USE_PDX(primaryPDx IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE) RETURN SYS_REFCURSOR 
+AS
+pdc_pdx SYS_REFCURSOR;
+BEGIN
+    OPEN pdc_pdx FOR
+    SELECT CODE,PDC FROM DRG_SHADOWBILLING.I10_V2 WHERE CODE=primaryPDx;
+  RETURN pdc_pdx;		
+END GET_PDC_USE_PDX;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_PDX_MALIGNANCY(primaryPDx IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE , 
+pdcs IN DRG_SHADOWBILLING.I10_V2.PDC%TYPE) RETURN SYS_REFCURSOR 
+AS
+pdx_malignant SYS_REFCURSOR;
+BEGIN
+    OPEN pdx_malignant FOR
+    SELECT CODE,MDC,PDC,CC,MAINCC,CCROW,HIV_AX,ACCPDX,SEX,AGEMIN,AGEDMIN,TRAUMA,AGEMAX,AGEDUSE 
+    FROM DRG_SHADOWBILLING.I10_V2 WHERE CODE =primaryPDx AND PDC = pdcs;
+  RETURN pdx_malignant;			
+END GET_PDX_MALIGNANCY;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_PDX_MDC(p_pdx_code IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE, mdcs IN DRG_SHADOWBILLING.I10_V2.MDC%TYPE) RETURN SYS_REFCURSOR 
+AS
+pdxmdc SYS_REFCURSOR;
+BEGIN
+    OPEN pdxmdc FOR   SELECT
+        CODE,MDC,PDC,CC,MAINCC,CCROW,HIV_AX,TRAUMA,ACCPDX,SEX,AGEMIN,AGEDMIN,AGEMAX,AGEDUSE
+        FROM DRG_SHADOWBILLING.I10_V2 WHERE CODE = p_pdx_code AND MDC=mdcs;
+  RETURN pdxmdc;
+END GET_PDX_MDC;
+---------------------------------------------------------------------------------------
+FUNCTION GET_PROC_ORP(orpCode IN DRG_SHADOWBILLING.ICD9CM.CODE%TYPE) 
+  RETURN SYS_REFCURSOR 
+IS
+    get_orp SYS_REFCURSOR;
+BEGIN
+    OPEN get_orp FOR  
+        SELECT 
+            CODE, ORP, SEX, PROC_SITE, ORPTYPE, 
+            PROCGR, PCPART, EXTLEV, DRGUSE, MAYUN, DESCS 
+        FROM DRG_SHADOWBILLING.ICD9CM  
+        WHERE CODE = orpCode  
+          AND PROCGR != '0';
+    RETURN get_orp;
+END GET_PROC_ORP;
+---------------------------------------------------------------------------------------
+FUNCTION GET_PROC_PDC (
+    icd9code IN VARCHAR2, 
+    pdcs     IN VARCHAR2
+) RETURN SYS_REFCURSOR
+IS
+    pdc_icd9_output SYS_REFCURSOR;
+BEGIN
+    OPEN pdc_icd9_output FOR  
+        SELECT 
+            a.CODE AS CODES, 
+            a.MDC, 
+            a.PDC, 
+            b.CODE, 
+            b.ORP, 
+            b.SEX, 
+            b.ORPTYPE, 
+            b.PROCGR, 
+            b.PCPART, 
+            b.EXTLEV, 
+            b.DRGUSE, 
+            b.MAYUN,
+            b.DESCS 
+        FROM DRG_SHADOWBILLING.ICD9_TO_MDC a 
+        INNER JOIN DRG_SHADOWBILLING.ICD9CM b ON a.CODE = b.CODE 
+        WHERE a.CODE = icd9code 
+          AND a.PDC  = pdcs;
+    RETURN pdc_icd9_output;
+END GET_PROC_PDC;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_SDX_VALIDATION_PREMDC (sdx IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE) RETURN SYS_REFCURSOR
+IS
+sdx_validation SYS_REFCURSOR;
+BEGIN
+    OPEN sdx_validation FOR  
+    SELECT AGEMIN,ACCPDX,SEX,PDC,CODE,TRAUMA,AGEDMIN
+        FROM
+        DRG_SHADOWBILLING.I10_V2
+    WHERE
+        CODE = sdx;
+  RETURN sdx_validation;
+END GET_SDX_VALIDATION_PREMDC;
+---------------------------------------------------------------------------------------
+FUNCTION GET_UNRALATED_PROC_ORPROC (
+    icd9code IN VARCHAR2, 
+    mdcs     IN VARCHAR2
+) RETURN SYS_REFCURSOR
+IS
+    unralated_or_proc SYS_REFCURSOR;
+BEGIN
+    OPEN unralated_or_proc FOR  
+        SELECT 
+            a.CODE AS CODES, 
+            a.MDC, 
+            a.PDC, 
+            b.CODE, 
+            b.ORP, 
+            b.SEX, 
+            b.ORPTYPE, 
+            b.PROCGR, 
+            b.PCPART, 
+            b.EXTLEV, 
+            b.DRGUSE, 
+            b.MAYUN,
+            b.DESCS 
+        FROM DRG_SHADOWBILLING.ICD9_TO_MDC a 
+        INNER JOIN DRG_SHADOWBILLING.ICD9CM b ON a.CODE = b.CODE 
+        WHERE a.CODE  = icd9code 
+          AND a.MDC   = mdcs 
+          AND b.PROCGR <> '0'; -- Standard SQL inequality operator
+    RETURN unralated_or_proc;
+END GET_UNRALATED_PROC_ORPROC;
+---------------------------------------------------------------------------------------
+FUNCTION get_valid_icd10 (
+    p_icd10_code IN DRG_SHADOWBILLING.I10VX_V2.CODE%TYPE
+) RETURN SYS_REFCURSOR
+IS
+    p_validcode SYS_REFCURSOR;
+BEGIN
+    OPEN p_validcode FOR  
+        SELECT validcode, 
+               description, 
+               code 
+        FROM   DRG_SHADOWBILLING.I10VX_V2
+        WHERE  code = p_icd10_code 
+          -- Using UPPER handles 'True', 'TRUE', and 'true' in one go
+          AND  (UPPER(validcode) = 'TRUE' OR validcode='1');
+    RETURN p_validcode;
+END get_valid_icd10;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_WARNING_ERROR(claimsid IN DRG_SHADOWBILLING.DRG_WARNING_ERROR.RESULT_ID%TYPE) RETURN SYS_REFCURSOR 
+AS
+warningerror SYS_REFCURSOR;
+BEGIN
+    OPEN warningerror FOR  
+    SELECT
+        SERIES, ERROR_CODE, DATA, DESCRIPTION, LHIO ,RESULT_ID
+        FROM
+        DRG_SHADOWBILLING.DRG_WARNING_ERROR
+    WHERE
+        RESULT_ID = claimsid;
+  RETURN warningerror;			
+END GET_WARNING_ERROR;
+---------------------------------------------------------------------------------------
+FUNCTION GET_EXCLUSION(secondary IN DRG_SHADOWBILLING.CCEX_V2.SDX%TYPE,
+                        primarys IN DRG_SHADOWBILLING.CCEX_V2.PDX%TYPE)  RETURN SYS_REFCURSOR
+IS
+getexclusion SYS_REFCURSOR;
+BEGIN
+    OPEN getexclusion FOR  
+    SELECT SDX,PDX
+        FROM
+        DRG_SHADOWBILLING.CCEX_V2 WHERE SDX=secondary AND PDX=primarys;
+  RETURN getexclusion;
+END GET_EXCLUSION;
+---------------------------------------------------------------------------------------
+FUNCTION GETICD10PREMDC(p_pdx_code IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE) RETURN SYS_REFCURSOR 
+AS
+accpdxs SYS_REFCURSOR;
+BEGIN
+    OPEN accpdxs FOR  
+    SELECT
+        CODE,MDC,PDC,CC,MAINCC,CCROW,HIV_AX,TRAUMA,ACCPDX,SEX,AGEMIN,AGEDMIN,AGEMAX,AGEDUSE
+        FROM
+        DRG_SHADOWBILLING.I10_V2
+    WHERE
+        CODE = p_pdx_code;
+  RETURN accpdxs;
+END GETICD10PREMDC;
+---------------------------------------------------------------------------------------
+FUNCTION PROC_AGE_VALIDATION(
+    procode IN DRG_SHADOWBILLING.ICD9CM.CODE%TYPE,
+    gender  IN DRG_SHADOWBILLING.ICD9CM.SEX%TYPE
+) RETURN SYS_REFCURSOR 
+AS
+    age_proc_validation SYS_REFCURSOR;
+BEGIN
+    OPEN age_proc_validation FOR  
+        SELECT 
+            CODE, 
+            ORP, 
+            ORPTYPE, 
+            SEX, 
+            PROC_SITE
+        FROM DRG_SHADOWBILLING.ICD9CM
+        WHERE CODE = procode 
+          -- Using 'B' for Both/Unisex alongside the specific gender check
+          AND (SEX = UPPER(gender) OR SEX = 'B');
+    RETURN age_proc_validation;
+END PROC_AGE_VALIDATION;
+---------------------------------------------------------------------------------------
+FUNCTION  TRIGGER_GROUPER(tagss IN DRG_SHADOWBILLING.DRG_RESULT.TAGS%TYPE) RETURN SYS_REFCURSOR 
+AS
+grouper SYS_REFCURSOR;
+BEGIN
+    OPEN grouper FOR  
+    SELECT
+        CLAIMS_SERIES, TAGS, PDX, PROC, SDX , LHIO FROM DRG_SHADOWBILLING.DRG_RESULT WHERE TAGS = tagss AND DRG is null;
+  RETURN grouper;			
+END TRIGGER_GROUPER;
+---------------------------------------------------------------------------------------
+FUNCTION VALIDATE_AGE(
+    p_pdx_code   IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE,
+    age_day      IN DRG_SHADOWBILLING.I10_V2.AGEDMIN%TYPE,
+    age_min_year IN DRG_SHADOWBILLING.I10_V2.AGEMIN%TYPE
+) RETURN SYS_REFCURSOR 
+AS
+    age_validation SYS_REFCURSOR;
+BEGIN
+    OPEN age_validation FOR
+        SELECT CODE, MDC, PDC, CC, MAINCC, CCROW, HIV_AX, 
+               TRAUMA, ACCPDX, SEX, AGEMIN, AGEDMIN, AGEMAX, AGEDUSE
+        FROM   DRG_SHADOWBILLING.I10_V2
+        WHERE  CODE = p_pdx_code 
+          AND  AGEMIN <= age_min_year 
+          AND  AGEMAX >= age_min_year
+          -- Logic: If AGEDUSE is 'Y', check age_day. If not 'Y', ignore age_day.
+          AND  (AGEDUSE <> 'Y' OR AGEDMIN <= age_day);
+
+    RETURN age_validation;
+END VALIDATE_AGE;
+---------------------------------------------------------------------------------------
+FUNCTION VALIDATE_GENDER(
+    p_pdx_code IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE,
+    gender   IN DRG_SHADOWBILLING.I10_V2.SEX%TYPE
+) RETURN SYS_REFCURSOR 
+AS
+    gender_validation SYS_REFCURSOR;
+BEGIN
+    OPEN gender_validation FOR  
+        SELECT 
+            CODE, 
+            MDC, 
+            PDC, 
+            CC, 
+            MAINCC, 
+            CCROW, 
+            HIV_AX, 
+            TRAUMA, 
+            ACCPDX, 
+            SEX, 
+            AGEMIN, 
+            AGEDMIN, 
+            AGEMAX, 
+            AGEDUSE
+        FROM DRG_SHADOWBILLING.I10_V2
+        WHERE CODE = p_pdx_code 
+          AND (SEX = UPPER(gender) OR SEX = 'B'); 
+
+    RETURN gender_validation;
+END VALIDATE_GENDER;
+---------------------------------------------------------------------------------------
+FUNCTION clean_icd10code (
+    p_icd10code IN VARCHAR2) RETURN VARCHAR2 AS
+    v_icd10code VARCHAR2(1000);
+BEGIN
+        v_icd10code := upper(replace(p_icd10code, '.', ''));
+        RETURN v_icd10code;
+END clean_icd10code;
+---------------------------------------------------------------------------------------
+FUNCTION GET_CCL 
+(p_pdx IN VARCHAR2,p_sdx IN VARCHAR2,p_dc IN VARCHAR2)
+RETURN VARCHAR2 AS 
+v_ccl VARCHAR2(1);
+v_cc varchar2(10);
+v_ccrow number;
+v_maincc varchar2(10);
+v_dccol number := 0;
+v_dcASsign varchar2(10) := 'false';
+v_sdx_ex clob;
+c_ccex SYS_REFCURSOR;
+v_found varchar2(10);
+v_cclm varchar2(1000);
+TYPE c_sdx_code IS REF CURSOR;
+l_sdx_code c_sdx_code;
+
+BEGIN
+    SELECT dccol into v_dccol FROM DC WHERE dc = p_dc;
+
+    if LENGTH(p_sdx) != 0 then
+
+        OPEN l_sdx_code FOR SELECT CC, CCROW, maincc FROM DRG_SHADOWBILLING.I10_V2 WHERE CODE = p_sdx;
+        LOOP
+            FETCH l_sdx_code INTO v_cc, v_ccrow, v_maincc;
+            EXIT WHEN l_sdx_code%notfound;
+        END LOOP;
+        CLOSE l_sdx_code;
+
+        if v_dcASsign = 'false' then
+            if v_cc = '1' OR UPPER(v_cc) = 'TRUE' then
+                c_ccex := DRGPKGFUNCTION.get_ccex(v_maincc);
+                loop
+                fetch c_ccex into v_sdx_ex;
+                if v_sdx_ex = p_pdx then
+                v_found := 'true';
+                exit;
+                else
+                v_found := 'false';
+                end if;
+                exit when c_ccex%notfound;
+                end loop;
+
+                if v_found = 'false' then
+                SELECT ccl into v_cclm FROM cclm WHERE ccrow = v_ccrow;
+
+                v_ccl := SUBSTR(v_cclm, v_dccol,1);
+                else
+                v_ccl := '0';
+                end if;                 
+            else
+            v_ccl := '0';
+            end if;
+
+        else
+        v_ccl := '0';
+        end if;
+
+    else
+        v_ccl := '0';
+
+    end if;
+
+    dbms_output.put_line('CC ROW: ' || v_ccrow);
+    dbms_output.put_line('DC COL: ' || v_dccol);
+    dbms_output.put_line('CCL: ' || v_ccl);
+    RETURN v_ccl;
+END GET_CCL;
+---------------------------------------------------------------------------------------
+FUNCTION GET_CCLVALUE(ccrows IN DRG_SHADOWBILLING.CCLM.CCROW%TYPE)RETURN SYS_REFCURSOR
+IS
+cclvalue SYS_REFCURSOR;
+BEGIN
+    OPEN cclvalue FOR  
+    SELECT CCROW,CCL
+        FROM
+       DRG_SHADOWBILLING.CCLM WHERE CCROW=ccrows;
+  RETURN cclvalue;
+END GET_CCLVALUE;
+---------------------------------------------------------------------------------------
+ FUNCTION SORT_CHARS (
+        p_string in varchar2
+    ) RETURN varchar AS
+        v_sorted varchar2(4000);
+        v_string varchar2(1);
+        type vcArray is
+            table of varchar(4000) index by varchar2(1);
+        sorted vcArray;
+        key varchar2(1);
+    BEGIN
+        FOR i in 1..length(p_string) LOOP
+            v_string := substr(p_string,i,1);
+            if ( sorted.exists(v_string) ) THEN sorted(v_string) := sorted(v_string)
+                                                                    || v_string;
+            ELSE sorted(v_string) := v_string;
+            END IF;
+        END LOOP;
+        v_sorted := '';
+        key := sorted.lASt;
+        WHILE key IS NOT NULL LOOP
+            v_sorted := v_sorted || sorted(key);
+            key := sorted.prior(key);
+        END LOOP;
+        RETURN v_sorted;
+    END;
+---------------------------------------------------------------------------------------
+FUNCTION GET_ICD9(rvs IN DRG_SHADOWBILLING.ICD9CM.CODE%TYPE)RETURN SYS_REFCURSOR
+IS
+icd9code_output SYS_REFCURSOR;
+BEGIN
+    OPEN icd9code_output FOR  
+    SELECT CODE FROM DRG_SHADOWBILLING.ICD9CM WHERE CODE=rvs;
+  RETURN icd9code_output;
+END GET_ICD9;
+---------------------------------------------------------------------------------------
+FUNCTION GET_COUNT(icdcm IN DRG_SHADOWBILLING.ICD9CM.CODE%TYPE)RETURN SYS_REFCURSOR
+IS
+count_output SYS_REFCURSOR;
+BEGIN
+    OPEN count_output FOR  
+    SELECT COUNT(CODE) AS countrest FROM DRG_SHADOWBILLING.ICD9CM WHERE CODE=icdcm;
+  RETURN count_output;
+END GET_COUNT;
+---------------------------------------------------------------------------------------
+FUNCTION TRAUMAICD10(sdx IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE)RETURN SYS_REFCURSOR
+IS
+trauma_output SYS_REFCURSOR;
+BEGIN
+    OPEN trauma_output FOR  
+    SELECT TRAUMA FROM DRG_SHADOWBILLING.I10_V2 WHERE CODE =sdx AND UPPER(TRAUMA)!='N';
+  RETURN trauma_output;
+END TRAUMAICD10;
+--END GET ICD 10 TRAUMA
+---------------------------------------------------------------------------------------
+--GET_ICD9 TRAUMA
+FUNCTION TRAUMAICD9CM(icdproc IN DRG_SHADOWBILLING.ICD9CM.CODE%TYPE)RETURN SYS_REFCURSOR
+IS
+trauma_output SYS_REFCURSOR;
+BEGIN
+    OPEN trauma_output FOR  
+   SELECT PROC_SITE FROM DRG_SHADOWBILLING.ICD9CM WHERE CODE =icdproc AND PROC_SITE!='-';
+  RETURN trauma_output;
+END TRAUMAICD9CM;
+---------------------------------------------------------------------------------------
+FUNCTION  GET_CHECK_DUPLICATE(accre IN DRG_SHADOWBILLING.DRG_INFO.ACCRENO%TYPE ,
+                            claimnum IN DRG_SHADOWBILLING.DRG_INFO.CLAIMNUMBER%TYPE,
+                            seriesout IN DRG_SHADOWBILLING.DRG_INFO.SERIES%TYPE) RETURN SYS_REFCURSOR
+
+IS
+ dupnclaims SYS_REFCURSOR;
+BEGIN
+  OPEN dupnclaims FOR 
+  SELECT  PDX_CODE,NB_TOB,NB_ADMWEIGHT,SERIES,LHIO,ACCRENO,CLAIMNUMBER
+  FROM DRG_SHADOWBILLING.DRG_INFO WHERE ACCRENO=accre AND CLAIMNUMBER=claimnum AND SERIES=seriesout;
+  RETURN dupnclaims;
+END GET_CHECK_DUPLICATE;
+---------------------------------------------------------------------------------------
+FUNCTION  COUNTBMDCICD10CODE(icd10code IN DRG_SHADOWBILLING.I10_V2.CODE%TYPE) RETURN SYS_REFCURSOR
+IS
+ v_results SYS_REFCURSOR;
+BEGIN
+  OPEN v_results FOR 
+  SELECT  COUNT(CODE) AS CODECOUNT
+  FROM DRG_SHADOWBILLING.I10_V2 WHERE CODE=icd10code;
+  RETURN v_results;
+END COUNTBMDCICD10CODE;
+-- END OF CHECKING DUPLICATES
+---------------------------------------------------------------------------------------
+FUNCTION SeekerDRG RETURN SYS_REFCURSOR
+IS
+v_results SYS_REFCURSOR;
+BEGIN
+OPEN v_results FOR 
+        SELECT RW,DRG,DC,MDC,DRGNAME FROM DRG_SHADOWBILLING.DRG ORDER BY DRG ASC;
+RETURN v_results;
+END SeekerDRG;
+--------------------------------------------------------------------------------
+FUNCTION SeekerICD9cm RETURN SYS_REFCURSOR
+IS
+v_results SYS_REFCURSOR;
+BEGIN
+OPEN v_results FOR 
+        SELECT CODE,DESCS FROM DRG_SHADOWBILLING.ICD9CM ORDER BY CODE ASC;
+RETURN v_results;
+END SeekerICD9cm;
+--------------------------------------------------------------------------------
+FUNCTION SeekerRVS RETURN SYS_REFCURSOR
+IS
+v_results SYS_REFCURSOR;
+BEGIN
+OPEN v_results FOR 
+        SELECT RVSCODE,DESCRIPTION FROM DRG_SHADOWBILLING.RVSCODE ORDER BY RVSCODE ASC;
+RETURN v_results;
+END SeekerRVS;
+--------------------------------------------------------------------------------
+FUNCTION SeekerICD10 RETURN SYS_REFCURSOR
+IS
+ v_results SYS_REFCURSOR;
+BEGIN
+  OPEN v_results FOR 
+            SELECT  a.DESCRIPTION,b.CODE
+             FROM DRG_SHADOWBILLING.I10VX_V2 a
+             JOIN DRG_SHADOWBILLING.I10_V2 b
+             ON a.CODE = b.CODE ORDER BY b.code ASC;
+  RETURN v_results;
+END SeekerICD10;
+--------------------------------------------------------------------------------
+FUNCTION GET_RVS(urvs IN DRG_SHADOWBILLING.RVSCODE.RVSCODE%TYPE) RETURN SYS_REFCURSOR
+IS
+v_results SYS_REFCURSOR;
+BEGIN
+OPEN v_results FOR 
+        SELECT RVSCODE,DESCRIPTION FROM DRG_SHADOWBILLING.RVSCODE WHERE RVSCODE=urvs;
+RETURN v_results;
+END GET_RVS;
+--------------------------------------------------------------------------------
+END DRGPKGFUNCTION;

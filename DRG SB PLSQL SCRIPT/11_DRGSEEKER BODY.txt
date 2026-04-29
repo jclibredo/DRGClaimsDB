@@ -1,0 +1,264 @@
+create or replace PACKAGE BODY           "DRGSEEKER" AS
+--------------------------------------------------------------------------------
+    PROCEDURE insertuser (
+        Message      OUT VARCHAR2,
+        Code         OUT NUMBER,
+        pemail       IN users.email%TYPE,
+        ppassword    IN users.password%TYPE,
+        prole        IN users.role%TYPE,
+        udatecreated IN users.datecreated%TYPE,
+        ucreatedby   IN users.createdby%TYPE,
+        ustatus   IN users.status%TYPE,
+        uname       IN users.name%TYPE
+    ) AS
+    BEGIN
+        INSERT INTO DRG_SHADOWBILLING.users (name,status,email,password,role,datecreated,createdby) 
+        VALUES (uname,ustatus,pemail,ppassword,prole,udatecreated,ucreatedby);
+        Message := 'SUCC';
+        Code := 00;
+    EXCEPTION
+    WHEN OTHERS THEN
+            Message := 'An error was encounter while Inserting user details '|| sqlcode|| '-error-'|| sqlerrm;
+            Code := 01;
+    END insertuser;
+--------------------------------------------------------------------------------
+FUNCTION  GETUSERBYID(puserid IN USERS.USERID%TYPE) RETURN sys_refcursor
+IS
+ v_result sys_refcursor;
+BEGIN
+  OPEN v_result FOR
+  SELECT USERID,NAME,EMAIL,PASSWORD,ROLE,DATECREATED,DATEUPDATED,UPDATEDBY,CREATEDBY,STATUS FROM DRG_SHADOWBILLING.USERS WHERE USERID=puserid;
+  RETURN v_result;
+  EXCEPTION
+  WHEN OTHERS THEN
+        -- Graceful cleanup if the cursor fails to open
+        IF v_result%ISOPEN THEN 
+            CLOSE v_result; 
+        END IF;
+        RAISE;
+END GETUSERBYID;
+-------------------------------------------------------------------------------
+FUNCTION GETALLUSER  RETURN sys_refcursor
+IS
+v_result sys_refcursor;
+BEGIN
+    OPEN v_result FOR
+    SELECT NAME,USERID,EMAIL,PASSWORD,ROLE,DATECREATED,DATEUPDATED,UPDATEDBY,CREATEDBY,STATUS FROM DRG_SHADOWBILLING.USERS;
+  RETURN v_result;
+  EXCEPTION
+  WHEN OTHERS THEN
+        -- Graceful cleanup if the cursor fails to open
+        IF v_result%ISOPEN THEN 
+            CLOSE v_result; 
+        END IF;
+        RAISE;
+END GETALLUSER;
+--------------------------------------------------------------------------------
+ PROCEDURE edituser (
+        Message      OUT VARCHAR2,
+        Code         OUT NUMBER,
+        pemail       IN users.email%TYPE,
+        ppassword    IN users.password%TYPE,
+        prole        IN users.role%TYPE,
+        puserid      IN users.userid%TYPE,
+        ustatus     IN users.status%TYPE,
+        uname       IN users.name%TYPE,
+        udateupdated IN users.dateupdated%TYPE,
+        uupdatedby   IN users.updatedby%TYPE
+    ) AS
+    BEGIN
+        UPDATE DRG_SHADOWBILLING.users SET email=pemail,password=ppassword,role=prole,status=ustatus,name=uname,dateupdated=udateupdated,updatedby=uupdatedby
+        WHERE USERID=puserid;
+        Message := 'SUCC';
+        Code := 00;
+        commit;
+    EXCEPTION
+    WHEN OTHERS THEN
+        Message := 'An error was encounter while updating user '|| sqlcode|| '-error-'|| sqlerrm;
+        Code := 01;
+    END edituser;
+--------------------------------------------------------------------------------
+FUNCTION  USERLOGIN(uemail IN users.email%TYPE, 
+           upassword IN users.password%type) RETURN sys_refcursor
+IS
+ v_result sys_refcursor;
+BEGIN
+  OPEN v_result FOR
+  SELECT USERID,NAME,EMAIL,PASSWORD,ROLE,DATECREATED,DATEUPDATED,UPDATEDBY,CREATEDBY,STATUS 
+  FROM DRG_SHADOWBILLING.USERS WHERE EMAIL=uemail AND PASSWORD=upassword;
+  RETURN v_result;
+  EXCEPTION
+  WHEN OTHERS THEN
+        -- Graceful cleanup if the cursor fails to open
+        IF v_result%ISOPEN THEN 
+            CLOSE v_result; 
+        END IF;
+        RAISE;
+END USERLOGIN;
+--------------------------------------------------------------------------------
+-- UPDATE OR FORGOT PASSWORD
+PROCEDURE UPDATEPASSWORD (
+        Message      OUT VARCHAR2,
+        Code         OUT NUMBER,
+        puserid      IN USERS.USERID%TYPE,
+        pemail       IN USERS.EMAIL%TYPE,
+        ppassword    IN USERS.PASSWORD%TYPE) AS
+  BEGIN
+    -- TODO: Implementation required for PROCEDURE DRGSEEKER.UPDATEPASSWORD
+    UPDATE DRG_SHADOWBILLING.USERS SET PASSWORD=ppassword WHERE USERID=puserid AND EMAIL=pemail;
+        Message := 'SUCC';
+        Code := 00;
+    EXCEPTION
+    WHEN OTHERS THEN
+        Message := 'An error was encounter while updating user password'|| sqlcode|| '-error-'|| sqlerrm;
+        Code := 01;
+  END UPDATEPASSWORD;
+--------------------------------------------------------------------------------
+-- VALIDATION TO CHECK DUPLICATE EMAIL
+FUNCTION COUNTEMAIL(pusername IN USERS.EMAIL%TYPE) RETURN sys_refcursor
+IS
+ v_result sys_refcursor;
+BEGIN
+  OPEN v_result FOR
+  SELECT COUNT(EMAIL) AS TOTALEMAIL FROM DRG_SHADOWBILLING.USERS WHERE EMAIL=pusername;
+  RETURN v_result;
+  EXCEPTION
+  WHEN OTHERS THEN
+        -- Graceful cleanup if the cursor fails to open
+        IF v_result%ISOPEN THEN 
+            CLOSE v_result; 
+        END IF;
+        RAISE;
+END COUNTEMAIL;
+-------------------------------------------------------------------------------
+-- GET USER BY USERNAME
+--FUNCTION  GETUSERBYUSERNAME(pusername IN USERS.EMAIL%TYPE) RETURN sys_refcursor
+--IS
+-- v_result sys_refcursor;
+--BEGIN
+--  OPEN v_result FOR
+--  SELECT USERID,NAME,EMAIL,PASSWORD,ROLE,DATECREATED,DATEUPDATED,UPDATEDBY,
+--  CREATEDBY,STATUS,OTP FROM DRG_SHADOWBILLING.USERS WHERE EMAIL=pusername;
+--  RETURN v_result;
+--END GETUSERBYUSERNAME;
+
+--UPDATE AS OF 5.28.25
+FUNCTION  GETUSERBYUSERNAME(pusername IN USERS.EMAIL%TYPE) RETURN sys_refcursor
+IS
+ v_result sys_refcursor;
+BEGIN
+  OPEN v_result FOR
+  SELECT USERID,NAME,EMAIL,PASSWORD,ROLE,DATECREATED,DATEUPDATED,UPDATEDBY,CREATEDBY,STATUS,OTP,OTPDATECREATED FROM DRG_SHADOWBILLING.USERS WHERE EMAIL=pusername;
+  RETURN v_result;
+  EXCEPTION
+  WHEN OTHERS THEN
+        -- Graceful cleanup if the cursor fails to open
+        IF v_result%ISOPEN THEN 
+            CLOSE v_result; 
+        END IF;
+        RAISE;
+END GETUSERBYUSERNAME;
+-------------------------------------------------------------------------------
+--PROCEDURE POSTOTP (
+--        Message      OUT VARCHAR2,
+--        Code         OUT NUMBER,
+--        puserid      IN USERS.USERID%TYPE,
+--        potp       IN USERS.OTP%TYPE) AS
+--BEGIN
+--    -- TODO: Implementation required for PROCEDURE DRGSEEKER.POSTOTP
+--    UPDATE DRG_SHADOWBILLING.USERS SET OTP=potp WHERE USERID=puserid;
+--    Message := 'SUCC';
+--    Code := 00;
+--    EXCEPTION
+--    WHEN OTHERS THEN
+--    Message := 'An error was encounter while updating user OTP'|| sqlcode|| '-error-'|| sqlerrm;
+--    Code := 01;
+--END POSTOTP;
+
+-------------------------------------------------------------------------------
+PROCEDURE POSTOTP (
+        Message         OUT VARCHAR2,
+        Code            OUT NUMBER,
+        puserid         IN USERS.USERID%TYPE,
+        potp            IN USERS.OTP%TYPE,
+        uotpdatecreated IN USERS.OTPDATECREATED%TYPE) AS
+BEGIN
+    -- TODO: Implementation required for PROCEDURE DRGSEEKER.POSTOTP
+    UPDATE DRG_SHADOWBILLING.USERS SET OTP=potp, OTPDATECREATED=uotpdatecreated WHERE USERID=puserid;
+        Message := 'SUCC';
+        Code := 00;
+    EXCEPTION
+    WHEN OTHERS THEN
+        Message := 'An error was encounter while updating user OTP'|| sqlcode|| '-error-'|| sqlerrm;
+        Code := 01;
+END POSTOTP;
+-------------------------------------------------------------------------------
+PROCEDURE TOKEN_S (
+            Message      OUT VARCHAR2,
+            Code         OUT NUMBER,
+            ptoken      IN SEEKER_HCF_TOKEN.TOKEN%TYPE,
+            pdatecreated IN SEEKER_HCF_TOKEN.DATECREATED%TYPE) AS
+            pagecount NUMBER;
+BEGIN
+    -- TODO: Implementation required for PROCEDURE DRGSEEKER.POSTOTP
+    SELECT COUNT(TOKEN) into pagecount FROM SEEKER_HCF_TOKEN;
+    IF(pagecount=0) THEN
+             INSERT INTO DRG_SHADOWBILLING.SEEKER_HCF_TOKEN(TOKEN,DATECREATED) 
+             VALUES (ptoken,pdatecreated);
+    ELSE
+            UPDATE DRG_SHADOWBILLING.SEEKER_HCF_TOKEN SET TOKEN=ptoken,DATECREATED=pdatecreated WHERE DATECREATED IS NOT NULL;
+    END IF;
+        Message := 'SUCC';
+        Code := 00;
+    EXCEPTION
+    WHEN OTHERS THEN
+        Message := 'An error was encounter while updating user token'|| sqlcode|| '-error-'|| sqlerrm;
+        Code := 01;
+END TOKEN_S;
+-------------------------------------------------------------------------------
+FUNCTION  GETTOKEN RETURN sys_refcursor
+IS
+ v_result sys_refcursor;
+BEGIN
+  OPEN v_result FOR
+  SELECT * FROM DRG_SHADOWBILLING.SEEKER_HCF_TOKEN;
+  RETURN v_result;
+  EXCEPTION
+  WHEN OTHERS THEN
+        -- Graceful cleanup if the cursor fails to open
+        IF v_result%ISOPEN THEN 
+            CLOSE v_result; 
+        END IF;
+        RAISE;
+END GETTOKEN;
+-------------------------------------------------------------------------------
+  PROCEDURE INSERT_USER_LOGS (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        u_username IN DRG_SHADOWBILLING.SEEKERUSERLOGS.USERNAME%TYPE,
+        u_dateaction IN DRG_SHADOWBILLING.SEEKERUSERLOGS.DATEACTION%TYPE,
+        u_module IN DRG_SHADOWBILLING.SEEKERUSERLOGS.MODULE%TYPE,
+        u_action IN DRG_SHADOWBILLING.SEEKERUSERLOGS.ACTION%TYPE,
+        u_details IN DRG_SHADOWBILLING.SEEKERUSERLOGS.DETAILS%TYPE) AS
+  BEGIN
+    -- TODO: Implementation required for PROCEDURE DRGSEEKER.INSERT_USER_LOGS
+    INSERT INTO DRG_SHADOWBILLING.SEEKERUSERLOGS (USERNAME,DATEACTION,MODULE,ACTION,DETAILS) 
+        VALUES (u_username,u_dateaction,u_module,u_action,u_details);
+        Message := 'SUCC';
+        Code := 00;
+    EXCEPTION
+    WHEN OTHERS THEN
+            Message := 'An error was encounter while Inserting user details '|| sqlcode|| '-error-'|| sqlerrm;
+            Code := 01;
+  END INSERT_USER_LOGS;
+-------------------------------------------------------------------------------
+FUNCTION  GETUSERLOGS RETURN sys_refcursor
+IS
+ v_result sys_refcursor;
+BEGIN
+  OPEN v_result FOR
+  SELECT * FROM DRG_SHADOWBILLING.SEEKERUSERLOGS;
+  RETURN v_result;
+END GETUSERLOGS;
+-------------------------------------------------------------------------------
+END DRGSEEKER;

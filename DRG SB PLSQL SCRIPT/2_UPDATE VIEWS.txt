@@ -1,0 +1,22 @@
+ CREATE OR REPLACE FORCE EDITIONABLE VIEW "DRG_SHADOWBILLING"."ACR_PATIENT_DATA" ("SERIES", "EXPIREDTIME", "EXPIREDDATE", "ADMISSIONDATE", "TIMEADMISSION", "TIMEDISCHARGE", "DISCHARGEDATE", "GENDER", "DISCHARGETYPE", "CLAIMNUMBER") AS 
+  select
+          b.series                 as series
+        , c.time_expire            as expiredtime
+        , c.pat_date_of_death      as expireddate
+        , b.date_adm               as admissiondate
+        , c.time_adm               as timeadmission
+        , c.time_dis               as timedischarge
+        , b.date_d                 as dischargedate
+        , b.patsex                 as gender
+        , a.disposition            as dischargetype
+        , eu.hospital_claim_id     as claimnumber
+        
+    FROM
+        UCPS.control c
+        LEFT JOIN UCPS.bats b
+        ON b.series = c.series
+        LEFT JOIN UCPS.acr_cf2 a    
+        ON  a.series  = b.series
+        LEFT JOIN UCPS.eclaims_upload eu
+        ON  EU.series  = b.series;
+

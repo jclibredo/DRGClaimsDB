@@ -1,0 +1,87 @@
+create or replace PACKAGE           "DRGSEEKER" AS 
+
+-- ADD NEW USER
+PROCEDURE INSERTUSER (
+        Message      OUT VARCHAR2,
+        Code         OUT NUMBER,
+        pemail       IN users.email%TYPE,
+        ppassword    IN users.password%TYPE,
+        prole        IN users.role%TYPE,
+        udatecreated IN users.datecreated%TYPE,
+        ucreatedby   IN users.createdby%TYPE,
+        ustatus   IN users.STATUS%TYPE,
+        uname       IN users.name%TYPE
+    );
+
+-- GET USER BY USERID
+FUNCTION GETUSERBYID(puserid IN users.userid%TYPE) RETURN sys_refcursor;
+
+-- GET ALL USERS
+FUNCTION GETALLUSER RETURN sys_refcursor;
+
+-- UPDATE USER DETAILS
+PROCEDURE EDITUSER (
+        Message      OUT VARCHAR2,
+        Code         OUT NUMBER,
+        pemail       IN users.email%TYPE,
+        ppassword    IN users.password%TYPE,
+        prole        IN users.role%TYPE,
+        puserid      IN users.userid%TYPE,
+        ustatus   IN users.STATUS%TYPE,
+        uname       IN users.name%TYPE,
+        udateupdated IN users.dateupdated%TYPE,
+        uupdatedby   IN users.updatedby%TYPE
+    );
+
+-- USER LOGIN
+FUNCTION USERLOGIN(uemail IN users.email%TYPE, 
+        upassword IN users.password%type) RETURN sys_refcursor;
+
+-- UPDATE OR FORGOT PASSWORD        
+PROCEDURE UPDATEPASSWORD (
+        Message      OUT VARCHAR2,
+        Code         OUT NUMBER,
+        puserid      IN USERS.USERID%TYPE,
+        pemail       IN USERS.EMAIL%TYPE,
+        ppassword    IN USERS.PASSWORD%TYPE);
+
+-- VALIDATION TO CHECK DUPLICATE EMAIL        
+FUNCTION COUNTEMAIL(pusername IN USERS.EMAIL%TYPE) RETURN sys_refcursor;
+
+-- GET USER BY USEERNAME
+FUNCTION GETUSERBYUSERNAME(pusername IN USERS.EMAIL%TYPE) RETURN sys_refcursor;
+
+--PROCEDURE POSTOTP (
+--        Message      OUT VARCHAR2,
+--        Code         OUT NUMBER,
+--        puserid      IN USERS.USERID%TYPE,
+--        potp       IN USERS.OTP%TYPE);
+
+--UPDATE AS OF 5.28.25   
+PROCEDURE POSTOTP (
+        Message         OUT VARCHAR2,
+        Code            OUT NUMBER,
+        puserid         IN USERS.USERID%TYPE,
+        potp            IN USERS.OTP%TYPE,
+        uotpdatecreated IN USERS.OTPDATECREATED%TYPE);
+
+PROCEDURE TOKEN_S (
+        Message      OUT VARCHAR2,
+        Code         OUT NUMBER,
+        ptoken      IN SEEKER_HCF_TOKEN.TOKEN%TYPE,
+        pdatecreated IN SEEKER_HCF_TOKEN.DATECREATED%TYPE);
+
+FUNCTION  GETTOKEN RETURN sys_refcursor;
+
+PROCEDURE INSERT_USER_LOGS (
+        Message OUT VARCHAR2,
+        Code OUT NUMBER,
+        u_username IN DRG_SHADOWBILLING.SEEKERUSERLOGS.USERNAME%TYPE,
+        u_dateaction IN DRG_SHADOWBILLING.SEEKERUSERLOGS.DATEACTION%TYPE,
+        u_module IN DRG_SHADOWBILLING.SEEKERUSERLOGS.MODULE%TYPE,
+        u_action IN DRG_SHADOWBILLING.SEEKERUSERLOGS.ACTION%TYPE,
+        u_details IN DRG_SHADOWBILLING.SEEKERUSERLOGS.DETAILS%TYPE);
+        
+FUNCTION  GETUSERLOGS RETURN SYS_REFCURSOR;
+
+END drgseeker;

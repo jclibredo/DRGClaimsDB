@@ -267,13 +267,13 @@ BEGIN
                         DBMS_OUTPUT.PUT_LINE('New PDX: '||l_new_pdx);
                         DBMS_OUTPUT.PUT_LINE('New SDX: '||l_new_sdx);
                         OPEN c_sdx FOR SELECT maincc
-                            FROM DRG_SHADOWBILLING.icd10_premdc
+                            FROM DRG_SHADOWBILLING.i10_v2
                             WHERE code = l_new_sdx;
                         LOOP
                             FETCH c_sdx INTO v_maincc;
                         EXIT WHEN c_sdx%notfound;
                         END LOOP;
-                       -- SELECT maincc into v_maincc FROM icd10_premdc where code = l_new_sdx;
+--                        SELECT maincc into v_maincc FROM icd10_premdc_V1 where code = l_new_sdx;
                         c_ccex := DRGPKGFUNCTION.get_ccex(v_maincc);
                         LOOP
                         FETCH c_ccex INTO v_sdx_ex;

@@ -1,0 +1,10 @@
+create or replace PACKAGE UHCDRGPKG IS
+--GET NCLAIMS DATA
+FUNCTION GET_NCLAIMS(seriesnum IN varchar2) RETURN SYS_REFCURSOR;
+  /* TODO enter package declarations (types, exceptions, methods etc) here */ 
+FUNCTION GETPATIENTDATA(seriesnums IN DRG_SHADOWBILLING.ACR_PATIENT_DATA.SERIES%type,
+                        claimid IN DRG_SHADOWBILLING.ACR_PATIENT_DATA.CLAIMNUMBER%type) RETURN SYS_REFCURSOR;
+  /* TODO enter package declarations (types, exceptions, methods etc) here */  
+FUNCTION GETPRIVATEFACILITY(upmcc IN DRG_SHADOWBILLING.ACR_HCF_SECTOR.PMCC_NO%type) RETURN SYS_REFCURSOR;
+  /* TODO enter package declarations (types, exceptions, methods etc) here */
+END UHCDRGPKG;
